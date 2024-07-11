@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import base64
 import os
-import time
 
 # Set up the title and description of the app
 st.markdown("<h1 style='text-align: center;'>Image Caption Generator</h1>", unsafe_allow_html=True)
@@ -18,7 +17,7 @@ def is_file_size_acceptable(file, max_size):
 
 # Function to handle image upload
 def upload_image():
-    uploaded_file = st.file_uploader('1.UPLOAD AN IMAGE OR PHOTO (MAX 4MB)', type=["jpg", "jpeg", "png"], accept_multiple_files=False)
+    uploaded_file = st.file_uploader('1. UPLOAD AN IMAGE OR PHOTO (MAX 4MB)', type=["jpg", "jpeg", "png"], accept_multiple_files=False)
     
     if uploaded_file is not None:
         if is_file_size_acceptable(uploaded_file, 4*1024*1024):
@@ -54,12 +53,12 @@ def select_vibe():
         "🧊 Cool",
         "😲 Controversial",
     ]
-    selected_vibe = st.selectbox("2.SELECT VIBE", options=vibes)
+    selected_vibe = st.selectbox("2. SELECT VIBE", options=vibes)
     return selected_vibe
 
 # Function to get additional prompt from the user
 def additional_prompt():    
-    add_prompt = st.text_input("3.ADDITIONAL PROMPT (OPTIONAL)", placeholder="eg. the photo is in Byron Bay")
+    add_prompt = st.text_input("3. ADDITIONAL PROMPT (OPTIONAL)", placeholder="e.g., the photo is in Byron Bay")
     return add_prompt
 
 # Function to generate caption using OpenAI API
@@ -75,6 +74,7 @@ def generate_caption(image_filename, image_data, vibe, prompt):
         "Content-Type": "application/json"
     }
     
+    # Simplified payload without image data
     payload = {
         "model": "text-davinci-003",
         "messages": [
@@ -84,12 +84,7 @@ def generate_caption(image_filename, image_data, vibe, prompt):
             },
             {
                 "role": "user",
-                "content": f"Create a caption for this image with vibe '{vibe}' and prompt '{prompt}'.",
-                "image": {
-                    "data": image_data,
-                    "filename": image_filename,
-                    "type": "image/jpeg"
-                }
+                "content": f"Create a caption for an image with vibe '{vibe}' and prompt '{prompt}'. (Image description: {image_filename})"
             }
         ],
         "max_tokens": 300
