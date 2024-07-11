@@ -74,9 +74,9 @@ def generate_caption(image_filename, image_data, vibe, prompt):
         "Content-Type": "application/json"
     }
     
-    # Simplified payload without image data
+    # Updated payload with the new model
     payload = {
-        "model": "text-davinci-003",
+        "model": "gpt-3.5-turbo",
         "messages": [
             {
                 "role": "system",
