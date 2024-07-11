@@ -98,7 +98,8 @@ def generate_caption(image_filename, image_data, vibe, prompt):
         st.write(content)
         return content
     else:
-        st.error("Error generating caption, please try later...")
+        st.error(f"Error generating caption, please try later... (Status code: {response.status_code})")
+        st.error(f"Response: {response.text}")
         return None
 
 # Main function to run the app
