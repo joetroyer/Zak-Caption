@@ -41,7 +41,7 @@ def encode_image(image_data):
 def select_vibe():
     vibes = [
         "😆 Fun",
-        "😜 Joke",
+        "💪 Motivational",
         "🤣 Funny",
         "🥳 Happy",
         "😑 Serious",
@@ -90,7 +90,7 @@ def generate_captions(image_filename, image_data, vibe, prompt, num_hashtags=Non
             },
             {
                 "role": "user",
-                "content": f"Create two captions for an image with vibe '{vibe}' and prompt '{prompt}'. Do not number the captions. (Image description: {image_filename})"
+                "content": f"Create two captions for an image that conveys the vibe '{vibe}'. Ensure the captions are relevant to the image content and match the selected vibe. The image is of a person lifting weights in a gym. {prompt if prompt else ''}"
             }
         ],
         "max_tokens": 300  # Adjust the token limit as needed
