@@ -65,7 +65,7 @@ def additional_prompt():
 # Function to generate hashtags
 def generate_hashtags(caption):
     hashtags = ["#photooftheday", "#instagood", "#picoftheday", "#love", "#nature", "#travel", "#fun", "#art", "#happy", "#cute"]
-    return random.sample(hashtags, 2)
+    return random.sample(hashtags, 3)
 
 # Function to generate captions using OpenAI API
 def generate_captions(image_filename, image_data, vibe, prompt):
@@ -93,16 +93,17 @@ def generate_captions(image_filename, image_data, vibe, prompt):
                 "content": f"Create 2 captions for an image with vibe '{vibe}' and prompt '{prompt}'. (Image description: {image_filename})"
             }
         ],
-        "max_tokens": 600
+        "max_tokens": 600,
+        "n": 2  # Requesting 2 completions
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
 
     if response.status_code == 200:
         data = response.json()
-        contents = [choice['message']['content'] for choice in data['choices']]
         captions_with_hashtags = []
-        for content in contents:
+        for choice in data['choices']:
+            content = choice['message']['content']
             hashtags = generate_hashtags(content)
             captions_with_hashtags.append(f"{content} {' '.join(hashtags)}")
         return captions_with_hashtags
@@ -122,9 +123,10 @@ def main():
         if st.button("Generate Captions"):
             captions = generate_captions(image_filename, image_data, selected_vibe, additional_prompt_text)
             if captions:
-                for i, caption in enumerate(captions, 1):
-                    st.write(f"**Caption {i}:** {caption}")
-                    st.button(f"Copy Caption {i}", key=f"copy_button_{i}", on_click=st.experimental_set_query_params, kwargs={"caption": caption})
+                for caption in captions:
+                    st.write(caption)
+                    st.button("Copy Caption", key=f"copy_button_{caption}", on_click=st.experimental_set_query_params, kwargs={"caption": caption})
+                    st.write("<br>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
