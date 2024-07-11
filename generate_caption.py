@@ -108,7 +108,9 @@ def main():
     if image_filename and image_data:
         selected_vibe = select_vibe()
         additional_prompt_text = additional_prompt()
-        generate_caption(image_filename, image_data, selected_vibe, additional_prompt_text)
+        
+        if st.button("Generate Caption"):
+            generate_caption(image_filename, image_data, selected_vibe, additional_prompt_text)
 
 if __name__ == "__main__":
     main()
