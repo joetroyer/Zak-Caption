@@ -63,12 +63,12 @@ def additional_prompt():
     return add_prompt
 
 # Function to generate hashtags
-def generate_hashtags(caption):
+def generate_hashtags(caption, num_hashtags):
     hashtags = ["#photooftheday", "#instagood", "#picoftheday", "#love", "#nature", "#travel", "#fun", "#art", "#happy", "#cute"]
-    return random.sample(hashtags, 3)
+    return random.sample(hashtags, num_hashtags)
 
 # Function to generate captions using OpenAI API
-def generate_captions(image_filename, image_data, vibe, prompt):
+def generate_captions(image_filename, image_data, vibe, prompt, num_hashtags=None):
     try:
         api_key = st.secrets['openai']['openai_apikey']
     except KeyError:
@@ -104,8 +104,11 @@ def generate_captions(image_filename, image_data, vibe, prompt):
         captions_with_hashtags = []
         for choice in data['choices']:
             content = choice['message']['content']
-            hashtags = generate_hashtags(content)
-            captions_with_hashtags.append(f"{content} {' '.join(hashtags)}")
+            if num_hashtags:
+                hashtags = generate_hashtags(content, num_hashtags)
+                captions_with_hashtags.append(f"{content} {' '.join(hashtags)}")
+            else:
+                captions_with_hashtags.append(content)
         return captions_with_hashtags
     else:
         st.error(f"Error generating captions, please try later... (Status code: {response.status_code})")
@@ -116,12 +119,14 @@ def generate_captions(image_filename, image_data, vibe, prompt):
 def main():
     image_filename, image_data, base64_image = upload_image()
     
+    selected_vibe = select_vibe()
+    additional_prompt_text = additional_prompt()
+    generate_hashtags_option = st.checkbox("Generate 2-3 relevant hashtags")
+    num_hashtags = 3 if generate_hashtags_option else None
+    
     if image_filename and image_data:
-        selected_vibe = select_vibe()
-        additional_prompt_text = additional_prompt()
-        
         if st.button("Generate Captions"):
-            captions = generate_captions(image_filename, image_data, selected_vibe, additional_prompt_text)
+            captions = generate_captions(image_filename, image_data, selected_vibe, additional_prompt_text, num_hashtags)
             if captions:
                 for caption in captions:
                     st.write(caption)
