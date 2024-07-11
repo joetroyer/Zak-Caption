@@ -90,7 +90,7 @@ def generate_captions(image_filename, image_data, vibe, prompt, num_hashtags=Non
             },
             {
                 "role": "user",
-                "content": f"Create 2 captions for an image with vibe '{vibe}' and prompt '{prompt}'. (Image description: {image_filename})"
+                "content": f"Create two captions for an image with vibe '{vibe}' and prompt '{prompt}'. Do not number the captions. (Image description: {image_filename})"
             }
         ],
         "max_tokens": 300  # Adjust the token limit as needed
@@ -101,8 +101,7 @@ def generate_captions(image_filename, image_data, vibe, prompt, num_hashtags=Non
     if response.status_code == 200:
         data = response.json()
         content = data['choices'][0]['message']['content']
-        captions = content.split("\n")
-        captions = [caption.strip() for caption in captions if caption.strip()]  # Remove empty lines and spaces
+        captions = [line for line in content.split('\n') if line.strip() and not line.strip().startswith(('1.', '2.'))]  # Remove empty lines and numbered lines
         
         if len(captions) > 2:
             captions = captions[:2]
