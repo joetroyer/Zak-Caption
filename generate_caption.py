@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import base64
 import os
+import random
 
 # Set up the title and description of the app
 st.markdown("<h1 style='text-align: center;'>Image Caption Generator</h1>", unsafe_allow_html=True)
@@ -61,8 +62,13 @@ def additional_prompt():
     add_prompt = st.text_input("3. ADDITIONAL PROMPT (OPTIONAL)", placeholder="e.g., the photo is in Byron Bay")
     return add_prompt
 
-# Function to generate caption using OpenAI API
-def generate_caption(image_filename, image_data, vibe, prompt):
+# Function to generate hashtags
+def generate_hashtags(caption):
+    hashtags = ["#photooftheday", "#instagood", "#picoftheday", "#love", "#nature", "#travel", "#fun", "#art", "#happy", "#cute"]
+    return random.sample(hashtags, 2)
+
+# Function to generate captions using OpenAI API
+def generate_captions(image_filename, image_data, vibe, prompt):
     try:
         api_key = st.secrets['openai']['openai_apikey']
     except KeyError:
@@ -84,21 +90,24 @@ def generate_caption(image_filename, image_data, vibe, prompt):
             },
             {
                 "role": "user",
-                "content": f"Create a caption for an image with vibe '{vibe}' and prompt '{prompt}'. (Image description: {image_filename})"
+                "content": f"Create 2 captions for an image with vibe '{vibe}' and prompt '{prompt}'. (Image description: {image_filename})"
             }
         ],
-        "max_tokens": 300
+        "max_tokens": 600
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
 
     if response.status_code == 200:
         data = response.json()
-        content = data['choices'][0]['message']['content']
-        st.write(content)
-        return content
+        contents = [choice['message']['content'] for choice in data['choices']]
+        captions_with_hashtags = []
+        for content in contents:
+            hashtags = generate_hashtags(content)
+            captions_with_hashtags.append(f"{content} {' '.join(hashtags)}")
+        return captions_with_hashtags
     else:
-        st.error(f"Error generating caption, please try later... (Status code: {response.status_code})")
+        st.error(f"Error generating captions, please try later... (Status code: {response.status_code})")
         st.error(f"Response: {response.text}")
         return None
 
@@ -110,8 +119,12 @@ def main():
         selected_vibe = select_vibe()
         additional_prompt_text = additional_prompt()
         
-        if st.button("Generate Caption"):
-            generate_caption(image_filename, image_data, selected_vibe, additional_prompt_text)
+        if st.button("Generate Captions"):
+            captions = generate_captions(image_filename, image_data, selected_vibe, additional_prompt_text)
+            if captions:
+                for i, caption in enumerate(captions, 1):
+                    st.write(f"**Caption {i}:** {caption}")
+                    st.button(f"Copy Caption {i}", key=f"copy_button_{i}", on_click=st.experimental_set_query_params, kwargs={"caption": caption})
 
 if __name__ == "__main__":
     main()
